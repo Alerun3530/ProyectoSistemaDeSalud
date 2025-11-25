@@ -1,0 +1,856 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Sistema EPS{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8fafc;
+        display: block;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0;
+        animation: none;
+    }
+
+    .card {
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 280px;
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        height: 100vh;
+        left: 0;
+        top: 0;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+
+    .sidebar-header {
+        padding: 30px 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .sidebar-logo-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #0d6efd, #198754);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .sidebar-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .sidebar-subtitle {
+        font-size: 0.85rem;
+        opacity: 0.7;
+        margin: 0;
+    }
+
+    .sidebar-menu {
+        flex: 1;
+        padding: 20px 0;
+        overflow-y: auto;
+    }
+
+    .menu-item {
+        padding: 14px 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+        font-weight: 500;
+    }
+
+    .menu-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left-color: #0d6efd;
+    }
+
+    .menu-item.active {
+        background: rgba(13, 110, 253, 0.2);
+        color: white;
+        border-left-color: #0d6efd;
+    }
+
+    .menu-item-icon {
+        font-size: 1.3rem;
+        width: 24px;
+        text-align: center;
+    }
+
+    .sidebar-footer {
+        padding: 20px 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #0d6efd, #198754);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .user-details {
+        flex: 1;
+    }
+
+    .user-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .user-role {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin: 0;
+    }
+
+    /* Main Content */
+    .main-content {
+        margin-left: 280px;
+        flex: 1;
+        padding: 0;
+        overflow-y: auto;
+        height: 100vh;
+    }
+
+    .top-bar {
+        background: white;
+        padding: 20px 40px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .top-bar-title {
+        margin: 0;
+        font-size: 1.8rem;
+        color: #1e293b;
+        font-weight: 800;
+    }
+
+    .content-area {
+        padding: 40px;
+    }
+
+    .content-section {
+        display: none;
+    }
+
+    .content-section.active {
+        display: block;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+
+    .stat-icon.blue {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    }
+
+    .stat-icon.green {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    }
+
+    .stat-icon.yellow {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+    }
+
+    .stat-icon.purple {
+        background: linear-gradient(135deg, #e9d5ff, #d8b4fe);
+    }
+
+    .stat-info h3 {
+        margin: 0 0 8px 0;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .stat-info p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    /* Table Styles */
+    .data-table-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .table-header {
+        padding: 24px;
+        border-bottom: 2px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .btn-small {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary-small {
+        background: linear-gradient(135deg, #0d6efd, #198754);
+        color: white;
+    }
+
+    .btn-primary-small:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        color: white;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    tbody tr {
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-activo {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-pendiente {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-aprobado {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-rechazado {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+
+        .main-content {
+            margin-left: 0;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        color: #334155;
+    }
+
+    .clickable-row {
+        cursor: pointer;
+    }
+
+    .clickable-row:hover {
+        background: #f1f5f9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🏥</div>
+                <div>
+                    <h2 class="sidebar-title">Sistema EPS</h2>
+                    <p class="sidebar-subtitle">Gestión de Salud</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-menu">
+            <a class="menu-item active" onclick="showModule('afiliados')">
+                <span class="menu-item-icon">👥</span>
+                <span>Afiliados</span>
+            </a>
+            <a class="menu-item" onclick="showModule('solicitudes')">
+                <span class="menu-item-icon">📋</span>
+                <span>Solicitudes</span>
+            </a>
+            <a class="menu-item" onclick="showModule('novedades')">
+                <span class="menu-item-icon">🔔</span>
+                <span>Novedades</span>
+            </a>
+            <a class="menu-item" onclick="showModule('municipios')">
+                <span class="menu-item-icon">📍</span>
+                <span>Municipios / Contactos</span>
+            </a>
+            <a class="menu-item" onclick="showModule('reportes')">
+                <span class="menu-item-icon">📊</span>
+                <span>Reportes</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">{{ user.first_name.0|upper }}{{ user.last_name.0|upper }}</div>
+                <div class="user-details">
+                    <p class="user-name">{{ user.first_name }} {{ user.last_name }}</p>
+                    <p class="user-role">Administrador</p>
+                </div>
+            </div>
+            <form method="POST" action="{% url 'logout' %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" style="width: 100%; margin: 0; padding: 12px;">
+                    <span>🚪</span>
+                    Cerrar Sesión
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="top-bar">
+            <h1 class="top-bar-title" id="moduleTitle">Afiliados</h1>
+            <div style="color: #64748b; font-size: 0.95rem;">
+                📅 {{ "now"|date:"l, d \\d\\e F \\d\\e Y" }}
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- Módulo: Afiliados -->
+            <section id="afiliados" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">👥</div>
+                        <div class="stat-info">
+                            <h3>{{ total_afiliaciones }}</h3>
+                            <p>Total Afiliados</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">✓</div>
+                        <div class="stat-info">
+                            <h3>{{ total_afiliaciones }}</h3>
+                            <p>Activos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon yellow">⏳</div>
+                        <div class="stat-info">
+                            <h3>{{ afiliaciones_pendientes }}</h3>
+                            <p>En Trámite</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">📈</div>
+                        <div class="stat-info">
+                            <h3>{{ afiliaciones_mes }}</h3>
+                            <p>Este Mes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <div class="table-header">
+                        <h2 class="table-title">📋 Listado de Afiliados</h2>
+                        <a href="{% url 'crear_afiliacion' %}" class="btn-small btn-primary-small">+ Nueva Afiliación</a>
+                    </div>
+                    <div class="table-container" style="box-shadow: none; border-radius: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>N° Afiliación</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Correo Electrónico</th>
+                                    <th>EPS</th>
+                                    <th>Régimen</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Afiliación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for afiliacion in afiliaciones %}
+                                <tr class="clickable-row" onclick="window.location.href='{% url 'ver_afiliacion' afiliacion.id %}'">
+                                    <td><strong>{{ afiliacion.id }}</strong></td>
+                                    <td>{{ afiliacion.usuario.user.get_full_name }}</td>
+                                    <td>{{ afiliacion.usuario.user.email }}</td>
+                                    <td>{{ afiliacion.eps.nombre|default:"-" }}</td>
+                                    <td>{{ afiliacion.regimen.tipo_regimen|default:"-" }}</td>
+                                    <td>
+                                        {% if afiliacion.estado == 'ACTIVO' %}
+                                            <span class="status-badge status-activo">● Activo</span>
+                                        {% elif afiliacion.estado == 'INACTIVO' %}
+                                            <span class="status-badge status-rechazado">⏸ Suspendido</span>
+                                        {% else %}
+                                            <span class="status-badge">{{ afiliacion.estado }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ afiliacion.fecha_afiliacion|date:"d/m/Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">👥</div>
+                                            <h3>No hay afiliaciones registradas</h3>
+                                            <p>Las afiliaciones aparecerán aquí cuando se creen</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Módulo: Solicitudes -->
+            <section id="solicitudes" class="content-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon yellow">⏳</div>
+                        <div class="stat-info">
+                            <h3>{{ solicitudes_pendientes }}</h3>
+                            <p>En Trámite</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">✓</div>
+                        <div class="stat-info">
+                            <h3>{{ solicitudes_aprobadas }}</h3>
+                            <p>Aprobadas</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue">❌</div>
+                        <div class="stat-info">
+                            <h3>{{ solicitudes_rechazadas }}</h3>
+                            <p>Rechazadas</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">📋</div>
+                        <div class="stat-info">
+                            <h3>{{ total_solicitudes }}</h3>
+                            <p>Total Solicitudes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <div class="table-header">
+                        <h2 class="table-title">📋 Gestión de Solicitudes</h2>
+                    </div>
+                    {% if solicitudes %}
+                    <div class="table-container" style="box-shadow: none; border-radius: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Tipo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for solicitud in solicitudes %}
+                                <tr class="clickable-row" onclick="window.location.href='{% url 'ver_solicitud' solicitud.id %}'">
+                                    <td><strong>#{{ solicitud.id }}</strong></td>
+                                    <td>{{ solicitud.usuario.user.get_full_name }}</td>
+                                    <td>{{ solicitud.tipo_solicitud }}</td>
+                                    <td>
+                                        <span class="status-badge status-{{ solicitud.estado|lower }}">
+                                            {{ solicitud.estado }}
+                                        </span>
+                                    </td>
+                                    <td>{{ solicitud.fecha_solicitud|date:"d/m/Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>No hay solicitudes registradas</h3>
+                        <p>Las solicitudes de afiliación y cambios aparecerán aquí</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Módulo: Novedades -->
+            <section id="novedades" class="content-section">
+                <div class="stats-grid">
+                    
+                    
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon purple">🔔</div>
+                        <div class="stat-info">
+                            <h3>{{ total_novedades }}</h3>
+                            <p>Total Novedades</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <div class="table-header">
+                        <h2 class="table-title">🔔 Registro de Novedades</h2>
+                        <a href="{% url 'crear_novedad' %}" class="btn-small btn-primary-small">+ Nueva Novedad</a>
+                    </div>
+                    {% if novedades %}
+                    <div class="table-container" style="box-shadow: none; border-radius: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Tipo</th>
+                                    <th>Descripción</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for novedad in novedades %}
+                                <tr class="clickable-row" onclick="window.location.href='{% url 'ver_novedad' novedad.id %}'">
+                                    <td><strong>#{{ novedad.id }}</strong></td>
+                                    <td>{{ novedad.usuario.user.get_full_name }}</td>
+                                    <td>{{ novedad.tipo }}</td>
+                                    <td>{{ novedad.descripcion|truncatewords:10 }}</td>
+                                    <td>{{ novedad.fecha_novedad|date:"d/m/Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔔</div>
+                        <h3>No hay novedades registradas</h3>
+                        <p>Los cambios y actualizaciones de afiliados aparecerán aquí</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Módulo: Municipios / Contactos -->
+            <section id="municipios" class="content-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">📍</div>
+                        <div class="stat-info">
+                            <h3>{{ total_municipios }}</h3>
+                            <p>Municipios</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">🏢</div>
+                        <div class="stat-info">
+                            <h3>{{ total_sedes }}</h3>
+                            <p>Sedes</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon purple">🗺️</div>
+                        <div class="stat-info">
+                            <h3>{{ total_departamentos }}</h3>
+                            <p>Departamentos</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <div class="table-header">
+                        <h2 class="table-title">📍 Estadísticas por Municipio</h2>
+                        <a href="{% url 'estadisticas_municipios' %}" class="btn-small btn-primary-small">Ver Detalles</a>
+                    </div>
+                    <div class="table-container" style="box-shadow: none; border-radius: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Municipio</th>
+                                    <th>Departamento</th>
+                                    
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for municipio in municipios %}
+                                <tr>
+                                    <td><strong>{{ municipio.nombre }}</strong></td>
+                                    <td>{{ municipio.departamento.nombre }}</td>
+                                   
+                                    
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">📍</div>
+                                            <h3>No hay municipios registrados</h3>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Módulo: Reportes -->
+            <section id="reportes" class="content-section">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue">📊</div>
+            <div class="stat-info">
+                <h3>{{ total_usuarios }}</h3>
+                <p>Total Afiliados</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">✓</div>
+            <div class="stat-info">
+                <h3>{{ solicitudes_aprobadas }}</h3>
+                <p>Validaciones</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon yellow">🔔</div>
+            <div class="stat-info">
+                <h3>{{ total_novedades }}</h3>
+                <p>Novedades</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple">📈</div>
+            <div class="stat-info">
+                <h3>{{ total_afiliaciones }}</h3>
+                <p>Total Afiliaciones</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section para IA -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 60px 40px; text-align: center; box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4); margin-bottom: 40px;">
+        <div style="font-size: 5rem; margin-bottom: 20px; animation: pulse 2s infinite;">🤖</div>
+        <h2 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+            Análisis Inteligente con IA
+        </h2>
+        <p style="color: rgba(255,255,255,0.9); font-size: 1.2rem; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Obtén insights automáticos, tendencias y recomendaciones basadas en tus datos actuales
+        </p>
+        <a href="{% url 'reportes_ia' %}" 
+           style="display: inline-flex; align-items: center; gap: 12px; background: white; color: #667eea; padding: 18px 48px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; text-decoration: none; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: all 0.3s ease;"
+           onmouseover="this.style.transform='translateY(-4px) scale(1.05)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.3)'"
+           onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'">
+            <span style="font-size: 1.5rem;">🚀</span>
+            Ver Análisis IA Completo
+        </a>
+    </div>
+
+    <!-- Grid de Features -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+        <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); text-align: center; transition: all 0.3s ease;">
+            <div style="font-size: 3rem; margin-bottom: 16px;">📈</div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;">Tendencias</h3>
+            <p style="color: #64748b; margin: 0;">Análisis de crecimiento mensual y proyecciones futuras</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); text-align: center; transition: all 0.3s ease;">
+            <div style="font-size: 3rem; margin-bottom: 16px;">📊</div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;">Distribución</h3>
+            <p style="color: #64748b; margin: 0;">Visualización por régimen, EPS y municipios</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); text-align: center; transition: all 0.3s ease;">
+            <div style="font-size: 3rem; margin-bottom: 16px;">💡</div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;">Recomendaciones</h3>
+            <p style="color: #64748b; margin: 0;">Sugerencias automáticas para mejorar la gestión</p>
+        </div>
+
+        <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); text-align: center; transition: all 0.3s ease;">
+            <div style="font-size: 3rem; margin-bottom: 16px;">📥</div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;">Exportación</h3>
+            <p style="color: #64748b; margin: 0;">Descarga reportes en Excel y PDF</p>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+</style>
+</section>
+        </div>
+    </main>
+</div>
+
+<script>
+    function showModule(moduleName) {
+        // Ocultar todas las secciones
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Mostrar la sección seleccionada
+        document.getElementById(moduleName).classList.add('active');
+
+        // Actualizar menú activo
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        event.target.closest('.menu-item').classList.add('active');
+
+        // Actualizar título
+        const titles = {
+            'afiliados': 'Afiliados',
+            'solicitudes': 'Solicitudes',
+            'novedades': 'Novedades',
+            'municipios': 'Municipios / Contactos',
+            'reportes': 'Reportes'
+        };
+        document.getElementById('moduleTitle').textContent = titles[moduleName];
+    }
+</script>
+{% endblock %}

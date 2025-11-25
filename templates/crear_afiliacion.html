@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Nueva Afiliación - Sistema EPS{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; margin: 50px auto; padding: 40px;">
+    <div class="card" style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); background: white; padding: 40px;">
+        <div style="margin-bottom: 30px;">
+            <h2 style="font-size: 2rem; font-weight: 800; color: #1e293b; margin-bottom: 8px;">
+                ➕ Nueva Afiliación
+            </h2>
+            <p style="color: #64748b; margin: 0;">Complete el formulario para registrar una nueva afiliación</p>
+        </div>
+
+        <form method="POST" style="display: flex; flex-direction: column; gap: 24px;">
+            {% csrf_token %}
+
+            <!-- Datos del Usuario -->
+            <div style="background: #f8fafc; padding: 24px; border-radius: 12px;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; color: #334155; margin-bottom: 20px;">
+                    👤 Datos del Afiliado
+                </h3>
+                
+                <div class="form-group">
+                    <label for="usuario_id" style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">
+                        Usuario <span style="color: #ef4444;">*</span>
+                    </label>
+                    <select name="usuario_id" id="usuario_id" class="form-control" required 
+                            style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                        <option value="">Seleccione un usuario...</option>
+                        {% for usuario in usuarios %}
+                        <option value="{{ usuario.id }}">{{ usuario.user.get_full_name }} - {{ usuario.numero_documento }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Datos de la Afiliación -->
+            <div style="background: #f8fafc; padding: 24px; border-radius: 12px;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; color: #334155; margin-bottom: 20px;">
+                    🏥 Datos de la Afiliación
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label for="tipo_afiliacion" style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">
+                            Tipo de Afiliación <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select name="tipo_afiliacion" id="tipo_afiliacion" class="form-control" required
+                                style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                            <option value="NUEVO">Nueva Afiliación</option>
+                            <option value="TRASLADO">Traslado</option>
+                            <option value="ACTUALIZACION">Actualización</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha_afiliacion" style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">
+                            Fecha de Afiliación <span style="color: #ef4444;">*</span>
+                        </label>
+                        <input type="date" name="fecha_afiliacion" id="fecha_afiliacion" class="form-control" required
+                               value="{{ 'now'|date:'Y-m-d' }}"
+                               style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eps_id" style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">
+                            EPS <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select name="eps_id" id="eps_id" class="form-control" required onchange="loadSedes()"
+                                style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                            <option value="">Seleccione una EPS...</option>
+                            {% for eps in eps_list %}
+                            <option value="{{ eps.id }}">{{ eps.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regimen_id" style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">
+                            Régimen <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select name="regimen_id" id="regimen_id" class="form-control" required
+                                style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                            <option value="">Seleccione un régimen...</option>
+                            {% for regimen in regimenes %}
+                            <option value="{{ regimen.id }}">{{ regimen.tipo_regimen }} - {{ regimen.porcentaje_cotizacion }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                
+
+                    <div class="form-group">
+                        <label for="empleador_id" style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">
+                            Empleador (Opcional)
+                        </label>
+                        <select name="empleador_id" id="empleador_id" class="form-control"
+                                style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                            <option value="">Sin empleador...</option>
+                            {% for empleador in empleadores %}
+                            <option value="{{ empleador.id }}">{{ empleador.user.first_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="observaciones" style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">
+                        Observaciones
+                    </label>
+                    <textarea name="observaciones" id="observaciones" rows="4" class="form-control"
+                              placeholder="Ingrese cualquier información adicional relevante..."
+                              style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; resize: vertical;"></textarea>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary" 
+                   style="padding: 12px 32px; border-radius: 8px; font-weight: 600; text-decoration: none; background: #e2e8f0; color: #334155;">
+                    ❌ Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary" 
+                        style="padding: 12px 32px; border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #0d6efd, #198754); border: none; color: white; cursor: pointer;">
+                    ✅ Crear Afiliación
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function loadSedes() {
+    const epsId = document.getElementById('eps_id').value;
+    const sedeSelect = document.getElementById('sede_eps_id');
+    
+    if (!epsId) {
+        sedeSelect.innerHTML = '<option value="">Primero seleccione una EPS...</option>';
+        return;
+    }
+    
+    sedeSelect.innerHTML = '<option value="">Cargando sedes...</option>';
+    
+    fetch(`/api/sedes-por-eps/?eps_id=${epsId}`)
+        .then(response => response.json())
+        .then(data => {
+            sedeSelect.innerHTML = '<option value="">Seleccione una sede...</option>';
+            data.forEach(sede => {
+                const option = document.createElement('option');
+                option.value = sede.id;
+                option.textContent = `${sede.nombre} - ${sede.municipio__nombre}`;
+                sedeSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            sedeSelect.innerHTML = '<option value="">Error al cargar sedes</option>';
+        });
+}
+</script>
+{% endblock %}

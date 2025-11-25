@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Estadísticas por Municipio{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1400px; margin: 50px auto; padding: 40px;">
+    <div style="margin-bottom: 40px;">
+        <h2 style="font-size: 2.5rem; font-weight: 800; color: #1e293b; margin-bottom: 12px;">📍 Estadísticas por Municipio</h2>
+        <p style="color: #64748b; font-size: 1.1rem;">Análisis detallado de cobertura y gestión por región</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px;">
+        {% for stat in municipios_stats %}
+        <div class="card" style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: transform 0.3s;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px;">
+                <div>
+                    <h3 style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-bottom: 4px;">{{ stat.municipio.nombre }}</h3>
+                    <p style="color: #64748b; margin: 0;">{{ stat.municipio.departamento.nombre }}</p>
+                </div>
+                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                    📍
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #0d6efd;">
+                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Total Sedes</p>
+                    <p style="font-size: 2rem; font-weight: 800; color: #0d6efd; margin: 0;">{{ stat.total_sedes }}</p>
+                </div>
+                <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #10b981;">
+                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Afiliados</p>
+                    <p style="font-size: 2rem; font-weight: 800; color: #10b981; margin: 0;">{{ stat.total_afiliados }}</p>
+                </div>
+                
+            </div>
+
+            {% if stat.total_afiliados > 0 %}
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #f1f5f9;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <p style="font-size: 0.9rem; color: #64748b; margin: 0;">Tasa de cobertura</p>
+                    <p style="font-weight: 700; color: #10b981; font-size: 1.1rem; margin: 0;">
+                        {% widthratio stat.total_afiliados 100 100 %}%
+                    </p>
+                </div>
+                <div style="background: #e2e8f0; height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden;">
+                    <div style="background: linear-gradient(90deg, #10b981, #059669); height: 100%; width: {% widthratio stat.total_afiliados 100 100 %}%; transition: width 0.5s;"></div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px; color: #64748b;">
+            <p style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;">📍</p>
+            <h3 style="font-size: 1.5rem; color: #334155;">No hay datos de municipios disponibles</h3>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="margin-top: 40px; text-align: center;">
+        <a href="{% url 'dashboard' %}" class="btn btn-primary" style="padding: 14px 40px; font-size: 1.1rem;">← Volver al Dashboard</a>
+    </div>
+</div>
+
+<style>
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.15) !important;
+    }
+</style>
+{% endblock %}

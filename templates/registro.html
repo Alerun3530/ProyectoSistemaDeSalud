@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro - Sistema EPS{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="logo-container">
+        <span class="logo-icon">👤</span>
+    </div>
+    <h1>Registro de Afiliado</h1>
+    <p class="subtitle">Únete a nuestro sistema de salud</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %} show">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="{% url 'registro' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label">
+                <span>👤</span>
+                Nombre
+            </label>
+            <input type="text" name="first_name" class="form-input" placeholder="Juan" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">
+                <span>👤</span>
+                Apellido
+            </label>
+            <input type="text" name="last_name" class="form-input" placeholder="Pérez" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">
+                <span>📧</span>
+                Correo Electrónico
+            </label>
+            <input type="email" name="email" class="form-input" placeholder="correo@ejemplo.com" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">
+                <span>🔒</span>
+                Contraseña
+            </label>
+            <input type="password" name="password" class="form-input" placeholder="Mínimo 6 caracteres" required>
+            <p class="small-text">💡 Mínimo 6 caracteres</p>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">
+                <span>🔒</span>
+                Confirmar Contraseña
+            </label>
+            <input type="password" name="confirm_password" class="form-input" placeholder="Repite tu contraseña" required>
+        </div>
+
+        <button type="submit" class="btn btn-secondary">
+            <span>✓</span>
+            Crear Cuenta
+        </button>
+    </form>
+
+    <a href="{% url 'home' %}" style="text-decoration: none;">
+        <button class="btn btn-outline">
+            <span>←</span>
+            Volver
+        </button>
+    </a>
+
+    <div class="link-text">
+        ¿Ya tienes cuenta? 
+        <a href="{% url 'login' %}">Inicia sesión aquí</a>
+    </div>
+</div>
+{% endblock %}

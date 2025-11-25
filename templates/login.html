@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión - Sistema EPS{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="logo-container">
+        <span class="logo-icon">🔐</span>
+    </div>
+    <h1>Iniciar Sesión</h1>
+    <p class="subtitle">Accede a tu cuenta de EPS</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %} show">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label">
+                <span>📧</span>
+                Numero de Cédula
+            </label>
+            <input  name="cedula" class="form-input" placeholder="correo@ejemplo.com" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">
+                <span>🔒</span>
+                Contraseña
+            </label>
+            <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <span>✓</span>
+            Ingresar
+        </button>
+    </form>
+
+    <a href="{% url 'home' %}" style="text-decoration: none;">
+        <button class="btn btn-outline">
+            <span>←</span>
+            Volver
+        </button>
+    </a>
+
+
+</div>
+{% endblock %}

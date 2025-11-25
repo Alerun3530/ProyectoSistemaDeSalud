@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Nueva Novedad{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 50px auto; padding: 40px;">
+    <div class="card" style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <h2 style="font-size: 2rem; font-weight: 800; color: #1e293b; margin-bottom: 30px;">🔔 Registrar Nueva Novedad</h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">Usuario</label>
+                <select name="usuario_id" required class="form-control" style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                    <option value="">Seleccione un usuario...</option>
+                    {% for usuario in usuarios %}
+                    <option value="{{ usuario.id }}">{{ usuario.user.get_full_name }} - {{ usuario.user.email }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">Fecha de la Novedad</label>
+                <input type="date" name="fecha_novedad" class="form-control" value="{{ 'now'|date:'Y-m-d' }}" style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">Descripción</label>
+                <textarea name="descripcion" required rows="6" class="form-control" placeholder="Describa detalladamente la novedad..." style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px;">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">❌ Cancelar</a>
+                <button type="submit" class="btn btn-primary">✅ Registrar Novedad</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes con Análisis IA{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1400px; margin: 50px auto; padding: 40px;">
+    <div style="margin-bottom: 40px;">
+        <h2 style="font-size: 2.5rem; font-weight: 800; color: #1e293b; margin-bottom: 12px;">🤖 Reportes con Análisis Inteligente</h2>
+        <p style="color: #64748b; font-size: 1.1rem;">Dashboard analítico con insights automáticos del sistema</p>
+    </div>
+
+    <!-- Estadísticas Principales -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 40px;">
+        <div class="stat-card" style="background: linear-gradient(135deg, #0d6efd, #0056b3); color: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(13,110,253,0.3);">
+            <p style="opacity: 0.9; margin-bottom: 8px;">Total Afiliaciones</p>
+            <h3 style="font-size: 3rem; font-weight: 800; margin: 0;">{{ total_afiliaciones }}</h3>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(16,185,129,0.3);">
+            <p style="opacity: 0.9; margin-bottom: 8px;">Afiliaciones Activas</p>
+            <h3 style="font-size: 3rem; font-weight: 800; margin: 0;">{{ afiliaciones_activas }}</h3>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(245,158,11,0.3);">
+            <p style="opacity: 0.9; margin-bottom: 8px;">Tasa de Activación</p>
+            <h3 style="font-size: 3rem; font-weight: 800; margin: 0;">{{ analisis.tasa_activacion }}%</h3>
+        </div>
+    </div>
+
+    <!-- Análisis de Tendencias -->
+    <div class="card" style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 30px;">
+        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 24px;">📈 Tendencia de Afiliaciones (Últimos 6 Meses)</h3>
+        <div style="position: relative; height: 300px; background: #f8fafc; border-radius: 12px; padding: 20px;">
+            <canvas id="chartTendencias"></canvas>
+        </div>
+    </div>
+
+    <!-- Distribución por Régimen -->
+    <div class="card" style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 30px;">
+        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 24px;">🥧 Distribución por Régimen</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 24px;">
+            {% for regimen in regimenes_data %}
+            <div style="flex: 1; min-width: 250px; background: #f8fafc; padding: 24px; border-radius: 12px; border-left: 5px solid #0d6efd;">
+                <p style="color: #64748b; margin-bottom: 8px;">{{ regimen.tipo_regimen }} - {{ regimen.porcentaje_cotizacion }}% </p>
+                <h4 style="font-size: 2.5rem; font-weight: 800; color: #1e293b; margin: 0;">{{ regimen.total }}</h4>
+                <p style="color: #64748b; font-size: 0.9rem; margin-top: 8px;">
+                    {% widthratio regimen.total total_afiliaciones 100 %}% del total
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Análisis Inteligente -->
+    <div class="card" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 40px; border-radius: 16px; box-shadow: 0 8px 30px rgba(139,92,246,0.4); margin-bottom: 30px;">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+            <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                🤖
+            </div>
+            <div>
+                <h3 style="font-size: 1.8rem; font-weight: 800; margin: 0;">Análisis Inteligente del Sistema</h3>
+                <p style="opacity: 0.9; margin: 0;">Generado automáticamente en base a los datos actuales</p>
+            </div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.1); padding: 24px; border-radius: 12px; margin-bottom: 20px;">
+            <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 12px;">📊 Tendencia Identificada</h4>
+            <p style="font-size: 1.1rem; line-height: 1.6; margin: 0;">{{ analisis.tendencia }}</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.1); padding: 24px; border-radius: 12px;">
+            <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">💡 Recomendaciones Automáticas</h4>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                {% for recomendacion in analisis.recomendaciones %}
+                <li style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.05rem; line-height: 1.6;">
+                    ✓ {{ recomendacion }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        <a href="#" class="action-card" style="background: white; padding: 24px; border-radius: 12px; text-decoration: none; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: all 0.3s;">
+            <div style="font-size: 2rem; margin-bottom: 12px;">📥</div>
+            <h4 style="color: #1e293b; font-weight: 700; margin-bottom: 8px;">Exportar a Excel</h4>
+            <p style="color: #64748b; margin: 0;">Descargar reporte completo</p>
+        </a>
+        <a href="#" class="action-card" style="background: white; padding: 24px; border-radius: 12px; text-decoration: none; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: all 0.3s;">
+            <div style="font-size: 2rem; margin-bottom: 12px;">📄</div>
+            <h4 style="color: #1e293b; font-weight: 700; margin-bottom: 8px;">Generar PDF</h4>
+            <p style="color: #64748b; margin: 0;">Crear informe imprimible</p>
+        </a>
+        <a href="#" class="action-card" style="background: white; padding: 24px; border-radius: 12px; text-decoration: none; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: all 0.3s;">
+            <div style="font-size: 2rem; margin-bottom: 12px;">📧</div>
+            <h4 style="color: #1e293b; font-weight: 700; margin-bottom: 8px;">Enviar por Email</h4>
+            <p style="color: #64748b; margin: 0;">Compartir con el equipo</p>
+        </a>
+    </div>
+
+    <div style="margin-top: 40px; text-align: center;">
+        <a href="{% url 'dashboard' %}" class="btn btn-primary" style="padding: 14px 40px; font-size: 1.1rem;">← Volver al Dashboard</a>
+    </div>
+</div>
+
+<style>
+    .action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Datos de tendencias desde Django
+    const mesesData = {{ meses_data|safe }};
+    
+    // Crear gráfico
+    const ctx = document.getElementById('chartTendencias').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: mesesData.map(d => d.mes).reverse(),
+            datasets: [{
+                label: 'Afiliaciones por Mes',
+                data: mesesData.map(d => d.afiliaciones).reverse(),
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle Afiliación #{{ afiliacion.id }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; margin: 50px auto; padding: 40px;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h2 style="font-size: 2rem; font-weight: 800; color: #1e293b; margin-bottom: 8px;">
+                📋 Afiliación #{{ afiliacion.id }}
+            </h2>
+            <p style="color: #64748b; margin: 0;">Detalles completos de la afiliación</p>
+        </div>
+        <div style="display: flex; gap: 12px;">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary" 
+               style="padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; background: #e2e8f0; color: #334155;">
+                ← Volver
+            </a>
+            <button onclick="enableEdit()" id="btnEdit" class="btn btn-primary" 
+                    style="padding: 10px 20px; border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #0d6efd, #198754); border: none; color: white; cursor: pointer;">
+                ✏️ Editar Afiliación
+            </button>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+        <!-- Columna Principal -->
+        <div>
+            <!-- Información del Afiliado -->
+            <div class="card" style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); background: white; padding: 30px; margin-bottom: 24px;">
+                <h3 style="font-size: 1.3rem; font-weight: 700; color: #334155; margin-bottom: 24px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
+                    👤 Información del Afiliado
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Nombre Completo</p>
+                        <p style="font-weight: 600; color: #1e293b; margin: 0;">{{ afiliacion.usuario.user.get_full_name }}</p>
+                    </div>
+                    <div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Correo Electrónico</p>
+                        <p style="font-weight: 600; color: #1e293b; margin: 0;">{{ afiliacion.usuario.user.email }}</p>
+                    </div>
+                    <div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Usuario ID</p>
+                        <p style="font-weight: 600; color: #1e293b; margin: 0;">#{{ afiliacion.usuario.id }}</p>
+                    </div>
+                    <div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Fecha Registro</p>
+                        <p style="font-weight: 600; color: #1e293b; margin: 0;">{{ afiliacion.usuario.user.date_joined|date:"d/m/Y" }}</p>
+                    </div>
+                    <div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Numero de identificacion</p>
+                        <p style="font-weight: 600; color: #1e293b; margin: 0;">{{ afiliacion.usuario.numero_documento }}</p>
+                    </div>
+                     <div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Tipo de identificacion</p>
+                        <p style="font-weight: 600; color: #1e293b; margin: 0;">{{ afiliacion.usuario.tipo_documento }}</p>
+                    </div>
+                    {% if sisben %}
+                    <div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">SISBEN</p>
+                        <p style="font-weight: 600; color: #1e293b; margin: 0;">{{ sisben.clasificacion }}</p>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Fecha Afiliación</p>
+                        <p style="font-weight: 600; color: #1e293b; margin: 0;">{{ afiliacion.fecha_afiliacion|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos de Afiliación EDITABLES -->
+            <form method="POST" action="{% url 'editar_afiliacion' afiliacion.id %}" id="formAfiliacion">
+                {% csrf_token %}
+                <div class="card" style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); background: white; padding: 30px; margin-bottom: 24px;">
+                    <h3 style="font-size: 1.3rem; font-weight: 700; color: #334155; margin-bottom: 24px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
+                        🏥 Datos de la Afiliación
+                    </h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Estado</p>
+                            <p class="view-mode" style="margin: 0;">
+                                <span class="status-badge status-{{ afiliacion.estado|lower }}" style="padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    {{ afiliacion.estado }}
+                                </span>
+                            </p>
+                            <select name="estado" class="form-control edit-mode" style="display: none; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                                <option value="ACTIVO" {% if afiliacion.estado == 'ACTIVO' %}selected{% endif %}>Activo</option>
+                                <option value="INACTIVO" {% if afiliacion.estado == 'INACTIVO' %}selected{% endif %}>Inactivo</option>
+                                <option value="EN TRAMITE" {% if afiliacion.estado == 'EN TRAMITE' %}selected{% endif %}>En Trámite</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">EPS</p>
+                            <p style="font-weight: 600; color: #1e293b; margin: 0;" class="view-mode">{{ afiliacion.eps.nombre }}</p>
+                            <select name="eps_id" class="form-control edit-mode" style="display: none; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                                {% for eps in eps_list %}
+                                <option value="{{ eps.id }}" {% if eps.id == afiliacion.eps.id %}selected{% endif %}>{{ eps.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Régimen</p>
+                            <p style="font-weight: 600; color: #1e293b; margin: 0;" class="view-mode">{{ afiliacion.regimen.tipo_regimen }}</p>
+                            <select name="regimen_id" class="form-control edit-mode" style="display: none; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                                {% for regimen in regimenes %}
+                                <option value="{{ regimen.id }}" {% if regimen.id == afiliacion.regimen.id %}selected{% endif %}>{{ regimen.tipo_regimen }} - {{ regimen.porcentaje_cotizacion }} </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                          <div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Porcentaje de cotizacion</p>
+                        <p style="font-weight: 600; color: #1e293b; margin: 0;">{{ afiliacion.regimen.porcentaje_cotizacion }}</p>
+                    </div>
+                        <div>
+                            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Empleador</p>
+                            <p style="font-weight: 600; color: #1e293b; margin: 0;" class="view-mode">
+                                {% if afiliacion.empleador %}{{ afiliacion.empleador.user.get_full_name }}{% else %}No asignado{% endif %}
+                            </p>
+                            <select name="empleador_id" class="form-control edit-mode" style="display: none; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                                <option value="">Sin empleador</option>
+                                {% for empleador in empleadores %}
+                                <option value="{{ empleador.id }}" {% if afiliacion.empleador and empleador.id == afiliacion.empleador.id %}selected{% endif %}>{{ empleador.user.get_full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Edición -->
+                    <div class="edit-mode" style="display: none; margin-top: 24px; border-top: 2px solid #f1f5f9; padding-top: 24px; text-align: right;">
+                        <button type="button" onclick="cancelEdit()" class="btn btn-secondary" 
+                                style="padding: 10px 24px; border-radius: 8px; font-weight: 600; background: #e2e8f0; color: #334155; border: none; cursor: pointer; margin-right: 12px;">
+                            ❌ Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success" 
+                                style="padding: 10px 24px; border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #0d6efd, #198754); border: none; color: white; cursor: pointer;">
+                            💾 Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Beneficiarios CON AGREGAR Y ELIMINAR -->
+            <div class="card" style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); background: white; padding: 30px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
+                    <h3 style="font-size: 1.3rem; font-weight: 700; color: #334155; margin: 0;">
+                        👨‍👩‍👧‍👦 Beneficiarios
+                    </h3>
+                    <button onclick="showModalBeneficiario()" style="padding: 8px 16px; background: linear-gradient(135deg, #0d6efd, #198754); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        + Agregar
+                    </button>
+                </div>
+                
+                {% if beneficiarios %}
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    {% for beneficiario in beneficiarios %}
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #0d6efd; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">
+                                {{ beneficiario.beneficiario.user.first_name }} {{ beneficiario.beneficiario.user.last_name }}
+                            </p>
+                            <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Parentesco: {{ beneficiario.parentesco }}</p>
+                        </div>
+                        <form method="POST" action="{% url 'eliminar_beneficiario' beneficiario.id %}" style="display: inline;" onsubmit="return confirm('¿Eliminar este beneficiario?');">
+                            {% csrf_token %}
+                            <button type="submit" style="padding: 8px 16px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                🗑️ Eliminar
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 3rem; margin-bottom: 12px; opacity: 0.3;">👨‍👩‍👧‍👦</div>
+                    <p style="color: #64748b;">No hay beneficiarios registrados</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Documentos CON AGREGAR Y ELIMINAR -->
+            <div class="card" style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); background: white; padding: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
+                    <h3 style="font-size: 1.3rem; font-weight: 700; color: #334155; margin: 0;">
+                        📄 Documentos del Afiliado
+                    </h3>
+                    <button onclick="showModalDocumento()" style="padding: 8px 16px; background: linear-gradient(135deg, #0d6efd, #198754); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        + Agregar
+                    </button>
+                </div>
+                
+                {% if documentos %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                    {% for documento in documentos %}
+                    <div style="background: linear-gradient(135deg, #f8fafc, #e2e8f0); padding: 20px; border-radius: 12px; border-left: 4px solid #0d6efd; transition: all 0.3s;">
+                        <div style="font-size: 2.5rem; margin-bottom: 12px; text-align: center;">📄</div>
+                        
+                        <div style="text-align: center;">
+                            <p style="font-weight: 700; color: #1e293b; font-size: 1.05rem; margin-bottom: 8px;">
+                                {{ documento.tipo }}
+                            </p>
+                            
+                            {% if documento.archivo %}
+                            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px; word-break: break-all;">
+                                {{ documento.archivo.name|truncatechars:30 }}
+                            </p>
+                            {% endif %}
+
+                            <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 12px;">
+                                {% if documento.archivo %}
+                                
+                                
+                                <a href="{% url 'descargar_documento' documento.id %}"
+                                   style="flex: 1; padding: 8px 12px; background: #10b981; color: white; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.85rem; text-align: center;">
+                                    ⬇️ Descargar
+                                </a>
+                                {% endif %}
+                            </div>
+                            
+                            <form method="POST" action="{% url 'eliminar_documento' documento.id %}" style="display: inline;" onsubmit="return confirm('¿Eliminar este documento?');">
+                                {% csrf_token %}
+                                <button type="submit" style="width: 100%; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+                                    🗑️ Eliminar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 4rem; margin-bottom: 16px; opacity: 0.3;">📄</div>
+                    <p style="color: #64748b; margin: 0;">No hay documentos registrados</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Columna Lateral -->
+        <div>
+            <!-- Resumen Rápido -->
+            <div class="card" style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); background: linear-gradient(135deg, #0d6efd, #198754); color: white; padding: 24px; margin-bottom: 24px;">
+                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; opacity: 0.9;">📊 Resumen Rápido</h4>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 8px;">
+                        <p style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 4px;">Número de Afiliación</p>
+                        <p style="font-weight: 700; font-size: 1.2rem; margin: 0;">#{{ afiliacion.id }}</p>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 8px;">
+                        <p style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 4px;">Estado Actual</p>
+                        <p style="font-weight: 700; font-size: 1.1rem; margin: 0;">{{ afiliacion.estado }}</p>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 8px;">
+                        <p style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 4px;">Tiempo Activo</p>
+                        <p style="font-weight: 700; font-size: 1.1rem; margin: 0;">
+                            {{ afiliacion.fecha_afiliacion|timesince }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="card" style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); background: white; padding: 24px;">
+                <h4 style="font-size: 1.1rem; font-weight: 700; color: #334155; margin-bottom: 20px;">⚡ Acciones Rápidas</h4>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    
+                    <a href="{% url 'crear_novedad' %}" style="padding: 12px; background: #f8fafc; border-radius: 8px; text-decoration: none; color: #334155; font-weight: 600; transition: all 0.3s;">
+                        🔔 Registrar Novedad
+                    </a>
+                    
+                    <a href="{% url 'historial_usuario' afiliacion.usuario.id %}" style="padding: 12px; background: #f8fafc; border-radius: 8px; text-decoration: none; color: #334155; font-weight: 600; transition: all 0.3s;">
+                        📜 Ver Historial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Agregar Beneficiario -->
+<div id="modalBeneficiario" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 40px; border-radius: 16px; max-width: 500px; width: 90%;">
+        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 20px;">👨‍👩‍👧‍👦 Agregar Beneficiario</h3>
+        
+        <form method="POST" action="{% url 'agregar_beneficiario' afiliacion.id %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">Seleccionar Usuario</label>
+                <select name="beneficiario_id" required style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                    <option value="">Seleccione...</option>
+                    {% for usuario in usuarios_disponibles %}
+                    <option value="{{ usuario.id }}">{{ usuario.user.get_full_name }} - {{ usuario.numero_documento }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">Parentesco</label>
+                <input type="text" name="parentesco" required placeholder="Ej: Hijo, Cónyuge, Padre..." style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
+            </div>
+            
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" onclick="hideModalBeneficiario()" 
+                        style="padding: 10px 20px; border-radius: 8px; background: #e2e8f0; border: none; cursor: pointer; font-weight: 600;">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        style="padding: 10px 20px; border-radius: 8px; background: linear-gradient(135deg, #0d6efd, #198754); color: white; border: none; cursor: pointer; font-weight: 600;">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Agregar Documento -->
+<div id="modalDocumento" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 40px; border-radius: 16px; max-width: 500px; width: 90%;">
+        <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 20px;">📄 Agregar Documento</h3>
+        
+        <form method="POST" action="{% url 'agregar_documento' afiliacion.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">Tipo de Documento</label>
+                <input type="text" name="tipo" required placeholder="Ej: Cédula, Certificado Laboral..." style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: 600; color: #334155; margin-bottom: 8px; display: block;">Archivo</label>
+                <input type="file" name="archivo" required accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" 
+                       style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Formatos: PDF, JPG, PNG, DOC, DOCX</p>
+            </div>
+            
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" onclick="hideModalDocumento()" 
+                        style="padding: 10px 20px; border-radius: 8px; background: #e2e8f0; border: none; cursor: pointer; font-weight: 600;">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        style="padding: 10px 20px; border-radius: 8px; background: linear-gradient(135deg, #0d6efd, #198754); color: white; border: none; cursor: pointer; font-weight: 600;">
+                    Subir Documento
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function enableEdit() {
+    document.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'block');
+    document.getElementById('btnEdit').style.display = 'none';
+}
+
+function cancelEdit() {
+    document.querySelectorAll('.view-mode').forEach(el => el.style.display = 'block');
+    document.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
+    document.getElementById('btnEdit').style.display = 'inline-block';
+}
+
+function showModalBeneficiario() {
+    document.getElementById('modalBeneficiario').style.display = 'flex';
+}
+
+function hideModalBeneficiario() {
+    document.getElementById('modalBeneficiario').style.display = 'none';
+}
+
+function showModalDocumento() {
+    document.getElementById('modalDocumento').style.display = 'flex';
+}
+
+function hideModalDocumento() {
+    document.getElementById('modalDocumento').style.display = 'none';
+}
+</script>
+
+<style>
+    .status-activo {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    .status-inactivo {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    .status-suspendido, .status-en_tramite {
+        background: #fef3c7;
+        color: #92400e;
+    }
+</style>
+{% endblock %}
